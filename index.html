@@ -1,25 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang = "en">
   <head>
+    <title>
+      Fa la la la Twiddler
+    </title>
     <script src="jquery.js"></script>
     <script src="data_generator.js"></script>
   </head>
+  <style>
+
+    body { background-color: green }
+    h1 {
+        text-align: center;
+        color: #00aced;
+        margin-bottom: 0.5rem;
+    }
+    
+    #shownewtweets{
+        width: 200px;
+        margin: 0 auto;
+        text-align: center;
+        color: #fff;
+        font-size: 30px;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+
+    .handle { 
+      color: #00aced;
+      font-size: 30px;
+      font-weight: 900 
+    }
+
+    .ts {
+      color: black;
+    }
+
+    .msg {
+      color: red;
+      font-size: 20px
+    }
+
+    #reset {
+        width: 200px;
+        margin: 0 auto;
+        text-align: center;
+        color: #fff;
+        font-size: 12px;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+
+    .tweet {
+        margin: 2rem;
+        padding: 1rem;
+        border-radius: 5px;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+  </style>
   <body>
+
+    <!-- TITLE -->
+    <h1 id="title">Twiddle Dee Twiddle Ho Ho Holidays</h1>
+
+    <!--NEW TWEETS 
+    <h1 id="shownewtweets">Show New Tweets</h1> -->
+
+    <!-- RESET TWEETS -->
+    <div id="reset" style="display: none">HOME</div>
+
+    <!-- CONTAINER FOR TWEETS -->
+    <div id="tweets"></div>
+
+    <!-- FOOTER SCRIPTS -->
     <script>
 
       $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+        var clicked = false;
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
+        // Function that loads all tweets from stream into the DOM.
+        function loadTweets() {
+
+          // Access the tweets container and clear it..
+          var $tweets = $('#tweets');
+          $tweets.html('');
+
+          // Determines the number of tweets that were randomly generated.
+          var index = 0;
+
+          // Store the current time.
+          var page_load_dt = new Date($.now());
+
+          // Iterate through the dummy tweets.
+          while(index < streams.home.length) {
+
+            // Access the tweet.
+            var tweet = streams.home[index];
+
+            // Determine the number of seconds that have passed from when the page loaded.
+            var ts_diff = Math.abs(tweet.created_at - page_load_dt);
+
+            // Build the tweet.
+            var handle = '<div class="handle">@' + tweet.user + '</div>';
+            var message = '<div class="msg">' + tweet.message + '</div>';
+            if (ts_diff < 60000) {
+              var timestamp = '<div class="ts">' + parseInt(ts_diff / 1000.00) + ' seconds ago</div>';
+            } else {
+              var timestamp = '<div class="ts">' + parseInt(ts_diff / 60000.00) + ' minutes ago</div>';
+            }
+            var $tweet = $('<div class="tweet">' + handle + message + timestamp + '</div>');
+
+            // Append the tweet to the tweets container.
+            $tweet.prependTo($tweets);
+
+            // Decrement the index.
+            index += 1;
+
+          }
+         
+          // Listen for clicks on a username.
+        $('.handle').click(function() {
+            clicked = true;
+
+          // Access the handle of the person we are wanting to view.
+          var target_handle = $(this).text();
+
+          // Update the title of the page.
+          $('#title').html(target_handle + ' Timeline');
+          console.log("button");
+
+          // Iterate through each tweet.
+          $('.tweet').each(function() {
+
+            // If the tweet does not belong to the target handle then hide it.
+            var tweets_owner = $(this).find('.handle').text();
+            if (tweets_owner != target_handle) {
+              $(this).hide();
+            }
+
+            // Show the button.
+            $('#reset').slideDown(250);
+
+          });
+         });
         }
 
+        loadTweets();
+
+
+        // Listen for click on reset button.
+        $('#reset').click(function() {
+
+          // Update the title of the page.
+          $('#title').html('Twiddle Dee Twiddle Ho Ho Holidays');
+
+          // Show all tweets.
+          $('.tweet').show();
+
+          $('#reset').hide();
+
+          //clicked back to false;
+          clicked = false;
+
+        });
+
+        // // Show the button.
+        // $('#shownewtweets').slideDown(250);
+
+        // //Listen for click on show new tweets button.
+        // $('#shownewtweets').click(function() {
+        //   //loadTweets();
+        // });
+            setInterval(function() {
+              if (clicked === false){
+            loadTweets();
+             }
+            }, 5000)
       });
 
     </script>
